@@ -12,7 +12,8 @@ PCT_BAD = 1.0
 # SQL_QUERY: On which days did more than 1% of requests lead to errors?
 sql_log_stats = """
     select
-       to_char(date,'FMMonth DD, YYYY') as date, to_char(pct_bad,'9.99%%') as pct_bad
+       to_char(date,'FMMonth DD, YYYY') as date,
+       to_char(pct_bad,'9.99%%') as pct_bad
     from (
         select
             ok_response.date as date,
@@ -66,7 +67,8 @@ sql_top_authors = """
 # Titles for the answers
 title_log_stats = "Most popular three articles of all time"
 title_top_articles = "Most popular article authors of all time"
-title_top_authors = "Days when more than %d%% of requests lead to errors\n" % PCT_BAD
+title_top_authors = "Days when more than %d%% of requests"\
+                    " lead to errors" % PCT_BAD
 
 # Formatting for the answers
 format_log_stats = " * {} - {} errors"
@@ -74,7 +76,8 @@ format_top_articles = ' * "{}" - {} viewes'
 format_top_authors = " * {} - {} viewes"
 
 # Standard divider line
-divider_line =  "\n"+"="*60
+divider_line = "\n"+"="*60
+
 
 # Show and format the answer
 def display_answer(title, data_format, data):
@@ -83,10 +86,12 @@ def display_answer(title, data_format, data):
     for i in data:
         print (data_format.format(*i))
 
+
 # Read data from the DB
 def read_result(sql_query, params, cursor):
     cursor.execute(sql_query, params)
     return cursor.fetchall()
+
 
 # Establish DB connection
 def connect(database_name):
@@ -94,31 +99,33 @@ def connect(database_name):
         db = psycopg2.connect("dbname={}".format(database_name))
         cursor = db.cursor()
         return db, cursor
-    
+
     except psycopg2.Error as err:
         print ("Unable to connect to database")
         sys.exit(1)
 
-def run():
 
+def run():
     # Open DB Connection
     conn, cur = connect(DBNAME)
 
     # Read data from the DB - BEGIN
-    result_top_articles = read_result(sql_top_articles, (), cur )
-    result_top_authors = read_result(sql_top_authors, (), cur )
-    result_log_stats = read_result(sql_log_stats, (PCT_BAD,), cur )
+    result_top_articles = read_result(sql_top_articles, (), cur)
+    result_top_authors = read_result(sql_top_authors, (), cur)
+    result_log_stats = read_result(sql_log_stats, (PCT_BAD,), cur)
     # Read data from the DB - END
 
     # Close DB Connection
     conn.close()
 
     # Display Results - BEGIN
-    display_answer(title_top_articles , format_top_articles, result_top_articles)
-    display_answer(title_top_authors , format_top_authors, result_top_authors)
-    display_answer(title_log_stats , format_log_stats, result_log_stats)
+    display_answer(title_top_articles, format_top_articles,
+                   result_top_articles)
+    display_answer(title_top_authors, format_top_authors, result_top_authors)
+    display_answer(title_log_stats, format_log_stats, result_log_stats)
     print (divider_line)
     # Display Results - END
+
 
 if __name__ == '__main__':
     run()
